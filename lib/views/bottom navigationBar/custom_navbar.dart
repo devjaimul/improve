@@ -1,8 +1,9 @@
+import 'package:Improve.Ai/controller/profile/profile_controller.dart';
+import 'package:Improve.Ai/utlis/urls.dart';
 import 'package:Improve.Ai/views/home/home_screen.dart';
 import 'package:Improve.Ai/views/home/meal/meal_screen.dart';
 import 'package:Improve.Ai/views/home/notifications/notifications.dart';
 import 'package:Improve.Ai/views/home/profile/profile_screen.dart';
-
 import 'package:Improve.Ai/views/home/workout/workout_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -48,28 +49,45 @@ class CustomNavbarState extends State<CustomNavbar> {
   Widget build(BuildContext context) {
     final sizeH = MediaQuery.sizeOf(context).height;
     final sizeW = MediaQuery.sizeOf(context).width;
+
+    // Initialize the ProfileController to access profile data
+    final ProfileController profileController = Get.put(ProfileController());
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        title: currentIndex == 0 ? const Column(
+        title: currentIndex == 0
+            ?  Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            HeadingThree(data: 'Hello'),
-            HeadingThree(data: 'John'),
+            HeadingThree(data: 'Hello ✨'),
+            HeadingThree(data: profileController.profileData['name'] ?? 'User Name'),
           ],
-        ) : null,
+        )
+            : null,
         actions: [
-          IconButton(onPressed: () {
-            Get.to(const NotificationScreen());
-          }, icon: AppIcons.notification),
+          IconButton(
+              onPressed: () {
+                Get.to(const NotificationScreen());
+              },
+              icon: AppIcons.notification),
           InkWell(
             onTap: () {
               Get.to(const ProfileScreen());
             },
-            child: CircleAvatar(
-              radius: sizeH * .02,
-              backgroundImage: const AssetImage(AppImages.profile),
-            ),
+            child: Obx(() {
+              // Use Obx to listen for changes in the profile data
+              return CircleAvatar(
+                radius: sizeH * .02,
+                backgroundImage: (profileController.profileData['image'] != null &&
+                    profileController.profileData['image'].isNotEmpty)
+                    ? NetworkImage('${Urls.imageBaseUrl}/${profileController.profileData['image']}')
+                    : const AssetImage(AppImages.profile) as ImageProvider,
+                onBackgroundImageError: (_, __) {
+                  debugPrint('Failed to load network image.');
+                },
+              );
+            }),
           ),
           SizedBox(
             width: sizeW * .02,
@@ -149,4 +167,3 @@ class CustomNavbarState extends State<CustomNavbar> {
     );
   }
 }
-

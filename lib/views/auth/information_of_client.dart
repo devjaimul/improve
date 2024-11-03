@@ -105,7 +105,7 @@ class _InformationOfClientState extends State<InformationOfClient> {
                 controller: _heightController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  hintText: 'Your Height',
+                  hintText: 'Your Height (CM)',
                 ),
               ),
               SizedBox(height: sizeH * .02),
@@ -113,7 +113,7 @@ class _InformationOfClientState extends State<InformationOfClient> {
                 controller: _weightController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  hintText: 'Your Weight',
+                  hintText: 'Your Weight (KG)',
                 ),
               ),
               SizedBox(height: sizeH * .04),

@@ -1,6 +1,8 @@
 import 'package:Improve.Ai/controller/auth_controller.dart';
+import 'package:Improve.Ai/controller/profile/profile_controller.dart';
 import 'package:Improve.Ai/utlis/app_images.dart';
 import 'package:Improve.Ai/utlis/custom_text_style.dart';
+import 'package:Improve.Ai/utlis/urls.dart';
 import 'package:Improve.Ai/views/home/profile/profile_information.dart';
 import 'package:Improve.Ai/views/home/profile/setting/setting_screen.dart';
 import 'package:Improve.Ai/views/home/profile/subscription/my_subscription_before_pay.dart';
@@ -18,69 +20,87 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final sizeH = MediaQuery.sizeOf(context).height;
 
+    // Access the ProfileController to track user data
+    final ProfileController profileController = Get.put(ProfileController());
+
     return Scaffold(
       appBar: AppBar(
         title: const HeadingTwo(data: 'Profile'),
         centerTitle: true,
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(height: sizeH * .05), // Spacing from top using screen height
-            // Profile picture
-            CircleAvatar(
-              radius: sizeH * .06,
-              backgroundImage: const AssetImage(AppImages.profile),
-            ),
-            SizedBox(height: sizeH * .02), // Spacing below the profile picture
-            // Name
-            const HeadingTwo(data: 'Jane Cooper'),
+        child: Obx(() {
+          if (profileController.isLoading.value) {
+            return const CircularProgressIndicator(); // Display a loader while data is being fetched
+          }
 
-            SizedBox(height: sizeH * .016),
-            const Divider(
-              thickness: 1,
-              indent: 40,
-              endIndent: 40,
-            ),
-            SizedBox(height: sizeH * .02),
-            // Profile buttons
-            _buildProfileOption(
-              icon: Icons.person_outline,
-              label: 'Profile Information',
-              onTap: () {
-                Get.to(const ProfileInformation());
-              },
-            ),
-            _buildProfileOption(
-              icon: Icons.subscriptions_outlined,
-              label: 'Subscription',
-              onTap: () {
-                Get.to(MySubscriptionBeforePay());
-              },
-            ),
-            _buildProfileOption(
-              icon: Icons.settings_outlined,
-              label: 'Settings',
-              onTap: () {
-                Get.to(const SettingScreen());
-              },
-            ),
-            SizedBox(height: sizeH * .02),
-            // Logout button
-            _buildProfileOption(
-              isTrue: true,
-              icon: Icons.logout,
-              label: 'Logout',
-              iconColor: Colors.red,
-              labelColor: Colors.red,
-              borderColor: Colors.red,
-              onTap: () {
-                Get.bottomSheet(_buildLogoutBottomSheet(context));
-              },
-            ),
-          ],
-        ),
+          final profile = profileController.profileData;
+
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(height: sizeH * .05), // Spacing from top using screen height
+              // Profile picture
+              CircleAvatar(
+                radius: sizeH * .06,
+                backgroundImage: (profile['image'] != null && profile['image'].isNotEmpty)
+                    ? NetworkImage('${Urls.imageBaseUrl}/${profile['image']}')
+                    : const AssetImage(AppImages.profile) as ImageProvider,
+                onBackgroundImageError: (_, __) {
+                  debugPrint('Failed to load network image.');
+                },
+              ),
+              SizedBox(height: sizeH * .02), // Spacing below the profile picture
+              // Name
+              HeadingTwo(data: profile['name'] ?? 'User Name'),
+
+              SizedBox(height: sizeH * .016),
+              const Divider(
+                thickness: 1,
+                indent: 40,
+                endIndent: 40,
+              ),
+              SizedBox(height: sizeH * .02),
+              // Profile buttons
+              _buildProfileOption(
+                icon: Icons.person_outline,
+                label: 'Profile Information',
+                onTap: () async {
+                  await Get.to(const ProfileInformation());
+                  // Refresh the profile data when returning from ProfileInformation
+                  profileController.fetchProfileInfo();
+                },
+              ),
+              _buildProfileOption(
+                icon: Icons.subscriptions_outlined,
+                label: 'Subscription',
+                onTap: () {
+                  Get.to(MySubscriptionBeforePay());
+                },
+              ),
+              _buildProfileOption(
+                icon: Icons.settings_outlined,
+                label: 'Settings',
+                onTap: () {
+                  Get.to(const SettingScreen());
+                },
+              ),
+              SizedBox(height: sizeH * .02),
+              // Logout button
+              _buildProfileOption(
+                isTrue: true,
+                icon: Icons.logout,
+                label: 'Logout',
+                iconColor: Colors.red,
+                labelColor: Colors.red,
+                borderColor: Colors.red,
+                onTap: () {
+                  Get.bottomSheet(_buildLogoutBottomSheet(context));
+                },
+              ),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -113,8 +133,7 @@ class ProfileScreen extends StatelessWidget {
               Expanded(child: HeadingThree(data: label)),
               isTrue == true
                   ? const Icon(null)
-                  : Icon(Icons.arrow_forward_ios,
-                  color: Colors.white, size: 20.h),
+                  : Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20.h),
               SizedBox(width: 10.w),
             ],
           ),
@@ -129,7 +148,7 @@ class ProfileScreen extends StatelessWidget {
     final sizeW = MediaQuery.sizeOf(context).width;
     return Container(
       height: sizeH * 0.3,
-      padding: EdgeInsets.symmetric(vertical: sizeH*.02, horizontal: sizeW*.035),
+      padding: EdgeInsets.symmetric(vertical: sizeH * .02, horizontal: sizeW * .035),
       decoration: BoxDecoration(
         color: AppColors.primaryColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(30.r)),
@@ -145,14 +164,14 @@ class ProfileScreen extends StatelessWidget {
             data: 'logout?',
             color: Colors.red,
           ),
-          SizedBox(height: sizeH*.02),
+          SizedBox(height: sizeH * .02),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Expanded(
                 child: _buildCancelButton(context),
               ),
-              SizedBox(width: sizeW*.03),
+              SizedBox(width: sizeW * .03),
               Expanded(
                 child: _buildLogoutButton(context),
               ),
@@ -171,14 +190,14 @@ class ProfileScreen extends StatelessWidget {
         Get.back(); // Close the bottom sheet
       },
       child: Container(
-        height: sizeH*.05,
+        height: sizeH * .05,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30.r),
           border: Border.all(color: Colors.white),
           color: Colors.transparent,
         ),
         child: const Center(
-          child: HeadingThree(data: 'Cancel')
+          child: HeadingThree(data: 'Cancel'),
         ),
       ),
     );
@@ -193,14 +212,14 @@ class ProfileScreen extends StatelessWidget {
         Get.offAllNamed(RouteNames.signInScreen); // Navigate to the sign-in screen
       },
       child: Container(
-        height: sizeH*.05,
+        height: sizeH * .05,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30.r),
           color: Colors.red,
-          border: Border.all(color: Colors.white)
+          border: Border.all(color: Colors.white),
         ),
         child: const Center(
-          child: HeadingThree(data: 'Logout')
+          child: HeadingThree(data: 'Logout'),
         ),
       ),
     );

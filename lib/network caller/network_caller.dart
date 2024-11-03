@@ -29,10 +29,10 @@ class NetWorkCaller {
         return NetworkResponse(
             statusCode: response.statusCode, isSuccess: false, errorMessage: 'Unauthorized');
       } else {
+        final decodedError = jsonDecode(response.body);
+        final errorMessage = decodedError['message'] ?? 'An unknown error occurred';
         return NetworkResponse(
-            statusCode: response.statusCode,
-            isSuccess: false,
-            errorMessage: 'Error: ${response.body}');
+            statusCode: response.statusCode, isSuccess: false, errorMessage: 'Error: $errorMessage');
       }
     } catch (e) {
       return NetworkResponse(
@@ -66,10 +66,10 @@ class NetWorkCaller {
         return NetworkResponse(
             statusCode: response.statusCode, isSuccess: false, errorMessage: 'Unauthorized');
       } else {
+        final decodedError = jsonDecode(response.body);
+        final errorMessage = decodedError['message'] ?? 'An unknown error occurred';
         return NetworkResponse(
-            statusCode: response.statusCode,
-            isSuccess: false,
-            errorMessage: 'Error: ${response.body}');
+            statusCode: response.statusCode, isSuccess: false, errorMessage: 'Error: $errorMessage');
       }
     } catch (e) {
       return NetworkResponse(
@@ -109,10 +109,10 @@ class NetWorkCaller {
         return NetworkResponse(
             statusCode: response.statusCode, isSuccess: false, errorMessage: 'Unauthorized');
       } else {
+        final decodedError = jsonDecode(response.body);
+        final errorMessage = decodedError['message'] ?? 'An unknown error occurred';
         return NetworkResponse(
-            statusCode: response.statusCode,
-            isSuccess: false,
-            errorMessage: 'Error: ${response.body}');
+            statusCode: response.statusCode, isSuccess: false, errorMessage: 'Error: $errorMessage');
       }
     } catch (e) {
       return NetworkResponse(
@@ -128,9 +128,8 @@ class NetWorkCaller {
     }
 
     try {
-      debugPrint('API URL: $url');
+      debugPrint('PATCH Request URL: $url');
       debugPrint('Request Body: ${jsonEncode(body)}');
-      debugPrint('Authorization Token: ${AuthController.accessToken}');
 
       http.Response response = await http.patch(
         Uri.parse(url),
@@ -149,8 +148,10 @@ class NetWorkCaller {
         return NetworkResponse(
             statusCode: response.statusCode, isSuccess: true, responseData: decodedData);
       } else {
+        final decodedError = jsonDecode(response.body);
+        final errorMessage = decodedError['message'] ?? 'An unknown error occurred';
         return NetworkResponse(
-            statusCode: response.statusCode, isSuccess: false, errorMessage: 'An error occurred: ${response.body}');
+            statusCode: response.statusCode, isSuccess: false, errorMessage: 'Error: $errorMessage');
       }
     } catch (e) {
       return NetworkResponse(

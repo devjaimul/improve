@@ -1,185 +1,155 @@
+import 'package:Improve.Ai/controller/profile/update_profile_controller.dart';
+import 'package:Improve.Ai/controller/profile/profile_controller.dart';
+import 'package:Improve.Ai/utlis/urls.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart'; // Import image_picker package
+import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:Improve.Ai/global%20widget/custom_button.dart'; // Custom button import
+import 'package:Improve.Ai/global%20widget/custom_button.dart';
 import 'package:Improve.Ai/utlis/app_images.dart';
-
-import '../../../utlis/custom_text_style.dart'; // App images import
+import '../../../utlis/custom_text_style.dart';
 
 class ProfileUpdate extends StatefulWidget {
-  const ProfileUpdate({super.key});
+  final String userId;
+  const ProfileUpdate({super.key, required this.userId});
 
   @override
   _ProfileUpdateState createState() => _ProfileUpdateState();
 }
 
 class _ProfileUpdateState extends State<ProfileUpdate> {
-  // TextEditingControllers for each field
+  final UpdateProfileController _updateProfileController = Get.put(UpdateProfileController());
+  final ProfileController _profileController = Get.find<ProfileController>(); // Find the existing controller
+  final ImagePicker _picker = ImagePicker();
+  File? _profileImage;
+
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController genderController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
 
-  // Image picker
-  final ImagePicker _picker = ImagePicker();
-  File? _profileImage; // To store the selected profile image
-
-  // Show dialog to pick image source
   Future<void> _pickImage() async {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Gallery'),
-                onTap: () async {
-                  final XFile? image = await _picker.pickImage(
-                    source: ImageSource.gallery,
-                  );
-                  if (image != null) {
-                    setState(() {
-                      _profileImage = File(image.path); // Set the picked image
-                    });
-                  }
-                  Navigator.of(context).pop();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Camera'),
-                onTap: () async {
-                  final XFile? image = await _picker.pickImage(
-                    source: ImageSource.camera,
-                  );
-                  if (image != null) {
-                    setState(() {
-                      _profileImage = File(image.path); // Set the captured image
-                    });
-                  }
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _profileImage = File(image.path);
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Load existing profile data as initial values in the controllers
+    if (_profileController.profileData.isNotEmpty) {
+      final profile = _profileController.profileData;
+      nameController.text = profile['name'] ?? '';
+      addressController.text = profile['address'] ?? '';
+      genderController.text = profile['gender'] ?? '';
+      ageController.text = profile['age'] != null ? profile['age'].toString() : '';
+      heightController.text = profile['height'] != null ? profile['height'].toString() : '';
+      weightController.text = profile['weight'] != null ? profile['weight'].toString() : '';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final double avatarRadius = size.width * 0.15;
-    final double textFontSize = size.width * 0.04;
-    final double fieldHeight = size.height * 0.07;
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: const HeadingTwo(data: 'Profile Update'),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(size.width * 0.05),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: size.height * 0.03),
+      body: Obx(() {
+        if (_updateProfileController.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-              // Profile Picture with Edit Icon
-              Stack(
-                children: [
-                  CircleAvatar(
-                    radius: avatarRadius,
-                    backgroundImage: _profileImage != null
-                        ? FileImage(_profileImage!) // Show the selected image
-                        : const AssetImage(AppImages.profile) as ImageProvider, // Placeholder image
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: GestureDetector(
-                      onTap: _pickImage, // Trigger image picker dialog
-                      child: CircleAvatar(
-                        backgroundColor: Colors.white,
-                        radius: avatarRadius * 0.25,
-                        child: Icon(
-                          Icons.camera_alt,
-                          size: avatarRadius * 0.25,
-                          color: Colors.black,
+        final profile = _profileController.profileData;
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(size.width * 0.05),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: size.height * 0.03),
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: size.height * 0.08,
+                      backgroundImage: _profileImage != null
+                          ? FileImage(_profileImage!) // Display the local image if present
+                          : (profile['image'] != null && profile['image'].isNotEmpty)
+                          ? NetworkImage('${Urls.imageBaseUrl}/${profile['image']}')
+                          : const AssetImage(AppImages.profile) as ImageProvider,
+                      onBackgroundImageError: (_, __) {
+                        debugPrint('Failed to load network image.');
+                      },
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: _pickImage,
+                        child: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          radius: size.width * 0.05,
+                          child: Icon(Icons.camera_alt, size: size.width * 0.05, color: Colors.black),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
 
-              SizedBox(height: size.height * 0.03),
+                SizedBox(height: size.height * 0.03),
+                _buildProfileTextField('Name', nameController, hintText: profile['name']),
+                _buildProfileTextField('Address', addressController, hintText: profile['address']),
+                _buildProfileTextField('Gender', genderController, hintText: profile['gender']),
+                _buildProfileTextField('Age', ageController, isNumeric: true, hintText: profile['age']?.toString()),
+                _buildProfileTextField('Height (CM)', heightController, isNumeric: true, hintText: profile['height']?.toString()),
+                _buildProfileTextField('Weight (KG)', weightController, isNumeric: true, hintText: profile['weight']?.toString()),
+                SizedBox(height: size.height * 0.03),
+                CustomTextButton(
+                  text: 'Update Profile',
+                  onTap: () {
+                    Get.back();
+                    _updateProfileController.updateProfile(
+                      userId: widget.userId,
+                      name: nameController.text.isEmpty ? profile['name'] ?? '' : nameController.text,
+                      address: addressController.text.isEmpty ? profile['address'] ?? '' : addressController.text,
+                      gender: genderController.text.isEmpty ? profile['gender'] ?? '' : genderController.text,
+                      age: int.tryParse(ageController.text) ?? profile['age'],
+                      height: double.tryParse(heightController.text) ?? profile['height'],
+                      weight: double.tryParse(weightController.text) ?? profile['weight'],
+                      profileImage: _profileImage, // Pass the image file
+                    );
+                  },
+                ),
 
-              // Profile Form Fields
-              _buildProfileTextField('Your Name', nameController, fieldHeight, textFontSize),
-              _buildProfileTextField('E-mail', emailController, fieldHeight, textFontSize),
-              _buildProfileTextField('Address', addressController, fieldHeight, textFontSize),
-              _buildProfileTextField('Gender', genderController, fieldHeight, textFontSize),
-              _buildProfileTextField('Age', ageController, fieldHeight, textFontSize),
-              _buildProfileTextField('Height', heightController, fieldHeight, textFontSize),
-              _buildProfileTextField('Weight', weightController, fieldHeight, textFontSize),
-
-              SizedBox(height: size.height * 0.03),
-
-              // Update Profile Button
-              CustomTextButton(
-                text: 'Update Profile',
-                onTap: () {
-                  Get.back();
-                  Get.back();
-                  // Handle the profile update API integration here
-                  // Pass this profileData and the selected image (_profileImage) to your API request
-                },
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
-  // Helper widget to build text fields for profile information
-  Widget _buildProfileTextField(String label, TextEditingController controller, double height, double textFontSize) {
+  Widget _buildProfileTextField(String label, TextEditingController controller, {bool isNumeric = false, String? hintText}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: SizedBox(
-        height: height,
-        child: TextField(
-          controller: controller..text, // Setting initial value
-          decoration: InputDecoration(
-            labelText: label,
-            labelStyle: const TextStyle(color: Colors.white),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30.0),
-              borderSide: const BorderSide(color: Colors.white),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30.0),
-              borderSide: const BorderSide(color: Colors.white),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30.0),
-              borderSide: const BorderSide(color: Colors.white),
-            ),
-            filled: true,
-            fillColor: Colors.transparent,
-          ),
-          style: TextStyle(fontSize: textFontSize, color: Colors.white),
+      child: TextField(
+        controller: controller,
+        keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hintText,
+          labelStyle: const TextStyle(color: Colors.black54),
         ),
+        style: const TextStyle(color: Colors.black),
       ),
     );
   }

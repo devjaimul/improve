@@ -29,3 +29,4 @@ class WorkOutPlanController extends GetxController {
     }
   }
 }
+

@@ -67,7 +67,6 @@ class WorkoutScreen extends StatelessWidget {
         }
 
         if (workOutPlanController.statusCode.value == 200 && workOutPlanController.workoutPlan.isNotEmpty) {
-          final workoutPlan = workOutPlanController.workoutPlan;
 
           return SingleChildScrollView(
             child: Padding(
@@ -82,7 +81,7 @@ class WorkoutScreen extends StatelessWidget {
                     title: workOutPlan['slogan'],
                     buttonText: 'View Workout Plan',
                     onTap: () {
-                      Get.to(const WorkoutViewPlanScreen());
+                      Get.to( const WorkoutViewPlanScreen());
                     },
                     bgColor: AppColors.buttonSecondColor,
                   ),

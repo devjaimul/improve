@@ -1,5 +1,5 @@
 import 'package:Improve.Ai/controller/home/home_controller.dart';
-import 'package:Improve.Ai/views/home/sports/meal_view_plan_screen.dart';
+import 'package:Improve.Ai/views/home/sports/sports_view_plan_screen.dart';
 import 'package:Improve.Ai/views/home/sports/sports_routine_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

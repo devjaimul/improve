@@ -1,19 +1,18 @@
 import 'package:Improve.Ai/network%20caller/network_caller.dart';
 import 'package:get/get.dart';
 import '../../utlis/urls.dart';
-import '../../routes/routes_name.dart';
 
 class ResetPassController extends GetxController {
   var isLoading = false.obs;
 
-  Future<void> resetPassword(String userId, String newPassword, {String? oldPassword}) async {
+  Future<bool> resetPassword(String userId, String newPassword, {String? oldPassword}) async {
     if (newPassword.isEmpty) {
       Get.snackbar('Error', 'New password cannot be empty');
-      return;
+      return false;
     }
     if (newPassword.length < 6) {
       Get.snackbar('Error', 'Password must be at least 6 characters long');
-      return;
+      return false;
     }
 
     isLoading.value = true;
@@ -27,10 +26,11 @@ class ResetPassController extends GetxController {
     isLoading.value = false;
 
     if (response.isSuccess) {
-      Get.snackbar('Success', 'Password reset successful!');
-      Get.offAllNamed(RouteNames.signInScreen);
+      Get.snackbar('Success', 'Password changed successfully!');
+      return true;
     } else {
-      Get.snackbar('Error', response.errorMessage ?? 'Failed to reset password');
+      Get.snackbar('Error', response.errorMessage ?? 'Failed to change password');
+      return false;
     }
   }
 }

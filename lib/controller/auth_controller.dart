@@ -37,6 +37,10 @@ class AuthController {
     return userData;
   }
 
+  static String? getUserId() {
+    return userData?.id; // Make sure `userId` is a property in your `User` model
+  }
+
   static Future<void> clearAllData() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.clear();

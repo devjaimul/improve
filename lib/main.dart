@@ -1,10 +1,11 @@
+import 'package:Improve.Ai/controller/auth_controller.dart';
+import 'package:Improve.Ai/controller/controller_bindings.dart';
 import 'package:Improve.Ai/routes/routes_name.dart';
 import 'package:Improve.Ai/routes/routes_page.dart';
 import 'package:Improve.Ai/themes/light_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:Improve.Ai/controller/auth_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           theme: lightTheme(context),
           debugShowCheckedModeBanner: false,
+          initialBinding: ControllerBindings(), // Ensure all controllers are initialized here
           getPages: RoutePages.routes,
           initialRoute: isLoggedIn ? RouteNames.navBar : RouteNames.signInScreen,
         );

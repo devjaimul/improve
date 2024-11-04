@@ -22,6 +22,8 @@ class ProfileScreen extends StatelessWidget {
 
     // Access the ProfileController to track user data
     final ProfileController profileController = Get.put(ProfileController());
+    final AuthController authController = Get.put(AuthController()); // Initialize AuthController
+
 
     return Scaffold(
       appBar: AppBar(
@@ -95,7 +97,7 @@ class ProfileScreen extends StatelessWidget {
                 labelColor: Colors.red,
                 borderColor: Colors.red,
                 onTap: () {
-                  Get.bottomSheet(_buildLogoutBottomSheet(context));
+                  Get.bottomSheet(_buildLogoutBottomSheet(context, authController));
                 },
               ),
             ],
@@ -143,7 +145,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // Build the custom logout bottom sheet
-  Widget _buildLogoutBottomSheet(BuildContext context) {
+  Widget _buildLogoutBottomSheet(BuildContext context, AuthController authController) {
     final sizeH = MediaQuery.sizeOf(context).height;
     final sizeW = MediaQuery.sizeOf(context).width;
     return Container(
@@ -173,7 +175,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               SizedBox(width: sizeW * .03),
               Expanded(
-                child: _buildLogoutButton(context),
+                child: _buildLogoutButton(context, authController),
               ),
             ],
           ),
@@ -183,7 +185,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // Helper widget to build the Cancel button
-  Widget _buildCancelButton(context) {
+  Widget _buildCancelButton(BuildContext context) {
     final sizeH = MediaQuery.sizeOf(context).height;
     return GestureDetector(
       onTap: () {
@@ -204,11 +206,11 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // Helper widget to build the Logout button
-  Widget _buildLogoutButton(context) {
+  Widget _buildLogoutButton(BuildContext context, AuthController authController) {
     final sizeH = MediaQuery.sizeOf(context).height;
     return GestureDetector(
-      onTap: () {
-        AuthController.clearAllData();
+      onTap: () async {
+        await AuthController.clearAllData(); // Logout the user
         Get.offAllNamed(RouteNames.signInScreen); // Navigate to the sign-in screen
       },
       child: Container(

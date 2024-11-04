@@ -32,7 +32,7 @@ class OtpController extends GetxController {
     });
   }
 
-  Future<void> verifyOtp(String otp, String userId, bool isFromSignUp) async {
+  Future<void> verifyOtp(String otp, String userId, bool isFromSignUp, {bool cameFromChangePass = false}) async {
     _isLoading = true;
     update();
 
@@ -48,7 +48,6 @@ class OtpController extends GetxController {
     update();
 
     if (response.isSuccess) {
-      // Extract and save the token from the response
       String? token = response.responseData['data']['token'];
       if (token != null) {
         await AuthController.saveUserAccessToken(token);
@@ -58,8 +57,10 @@ class OtpController extends GetxController {
         // Navigate to the appropriate screen
         if (isFromSignUp) {
           Get.offAll(() => InformationOfClient(userId: userId));
+        } else if (cameFromChangePass) {
+          Get.offAll(() => ResetPassScreen(userId: userId, cameFromChangePass: true)); // Pass flag here
         } else {
-          Get.offAll(() =>  ResetPassScreen(userId: userId,));
+          Get.offAll(() => ResetPassScreen(userId: userId));
         }
       } else {
         Get.snackbar("Error", "Token not found in the response");
@@ -68,6 +69,8 @@ class OtpController extends GetxController {
       Get.snackbar("Error", response.errorMessage ?? "OTP verification failed");
     }
   }
+
+
 
   Future<void> resendOtp(String userId) async {
     _isResending = true;

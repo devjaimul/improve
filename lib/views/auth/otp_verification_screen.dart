@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'package:pin_code_fields/pin_code_fields.dart';
-
 import '../../controller/auth/otp_controller.dart';
 import '../../utlis/app-strings.dart';
 import '../../global widget/app_logo.dart';
@@ -11,9 +9,10 @@ import '../../utlis/custom_text_style.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String userId;
-  final bool isFromSignUp; // New parameter
+  final bool isFromSignUp;
+  final bool cameFromChangePass;
 
-  const OtpVerificationScreen({super.key, required this.userId, this.isFromSignUp = false});
+  const OtpVerificationScreen({super.key, required this.userId, this.isFromSignUp = false, this.cameFromChangePass = false});
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
@@ -26,8 +25,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   void initState() {
     super.initState();
-    // Start countdown when the screen is loaded
     otpController.startCountdown();
+
+    if (widget.userId.isNotEmpty) {
+      debugPrint('Sending OTP for userId: ${widget.userId}');
+      otpController.resendOtp(widget.userId);
+    } else {
+      debugPrint('User ID is missing. Cannot send OTP.');
+      Get.snackbar('Error', 'User ID is missing');
+    }
   }
 
   @override
@@ -74,7 +80,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       text: otpController.isLoading ? "Verifying..." : AppString.otpVerifyButton,
                       onTap: () {
                         if (!otpController.isLoading && _otpTEController.text.isNotEmpty) {
-                          otpController.verifyOtp(_otpTEController.text, widget.userId, widget.isFromSignUp);
+                          otpController.verifyOtp(_otpTEController.text, widget.userId, widget.isFromSignUp, cameFromChangePass: widget.cameFromChangePass);
                         } else {
                           Get.snackbar("Error", "Please enter the OTP");
                         }

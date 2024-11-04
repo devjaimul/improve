@@ -60,8 +60,8 @@ class CustomNavbarState extends State<CustomNavbar> {
             ?  Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            HeadingThree(data: 'Hello ✨'),
-            HeadingThree(data: profileController.profileData['name'] ?? 'User Name'),
+            const HeadingThree(data: 'Hello ✨'),
+            HeadingThree(data: profileController.profileData['name'] ?? ''),
           ],
         )
             : null,

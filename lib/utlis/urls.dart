@@ -22,4 +22,8 @@ class Urls {
 
   //profile
   static const String profileInfo = '$_baseUrl/users/me';
+  //policy
+  static const String policy = '$_baseUrl/application';
+  //plans
+  static const String workout = '$_baseUrl/plans/workout';
 }

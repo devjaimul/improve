@@ -2,7 +2,8 @@ import 'package:Improve.Ai/global%20widget/custom_button.dart';
 import 'package:Improve.Ai/global%20widget/custom_text.dart';
 import 'package:Improve.Ai/utlis/app_colors.dart';
 import 'package:Improve.Ai/utlis/custom_text_style.dart';
-import 'package:Improve.Ai/views/home/workout/todays_workout.dart';
+import 'package:Improve.Ai/views/bottom%20navigationBar/custom_navbar.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -40,7 +41,7 @@ class WorkoutGenerateScreen extends StatelessWidget {
                Column(
               children: [
                 CustomTextButton(text: 'Confirm Generate', onTap: (){
-                  Get.to(const TodaysWorkout());
+                  Get.offAll(const CustomNavbar());
                 }),
                 SizedBox(height: sizeH*.018),
                 Row(
